@@ -7,9 +7,9 @@ import { useDebouncedCallback } from "use-debounce";
 import css from "./Note.client.module.css";
 
 import NoteList from "@/components/NoteList/NoteList";
-import { fetchNotes } from "@/lib/api";
+import { fetchNotes } from "@/lib/api/clientApi";
 import type { Note } from "@/types/note";
-import type { FetchNotesResponse } from "@/lib/api";
+import type { FetchNotesResponse } from "@/lib/api/clientApi";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import Pagination from "@/components/Pagination/Pagination";
 import ErrorMessage from "../[...slug]/error";
