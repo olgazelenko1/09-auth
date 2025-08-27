@@ -2,7 +2,7 @@
 import css from './EditProfilePage.module.css'
 import Image from 'next/image'
 
-export const Edit = () => {
+const EditProfilePage = () => {
     return(
         <main className={css.mainContent}>
   <div className={css.profileCard}>
@@ -40,3 +40,5 @@ export const Edit = () => {
 
     );
 }
+
+export default EditProfilePage;
