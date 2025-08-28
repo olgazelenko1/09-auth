@@ -22,7 +22,7 @@ const EditProfilePage = () => {
     try {
       if (!user) throw new Error('User not found');
       const updated = await updateProfile({ username });
-      // update global store
+     
       useAuthStore.getState().setUser(updated);
       router.push('/profile');
     } catch (err) {

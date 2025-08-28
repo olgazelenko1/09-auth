@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import css from './ProfilePage.module.css';
 import { fetchCurrentUserServer } from '@/lib/api/serverApi';
 import { Metadata } from 'next';
@@ -36,7 +37,12 @@ export default async function ProfilePage() {
   return (
     <main className={css.mainContent}>
       <div className={css.profileCard}>
-        <h1 className={css.formTitle}>Profile</h1>
+        <div className={css.header}>
+          <h1 className={css.formTitle}>Profile</h1>
+          <Link href="/profile/edit" className={css.editProfileButton}>
+            Edit
+          </Link>
+        </div>
 
         <Image
           src={user.avatar || '/avatar-placeholder.png'}
