@@ -71,8 +71,12 @@ export const login = async (data: LoginRequest) => {
 };
 
 export const checkSession = async (): Promise<boolean> => {
-  const res = await api.get<CheckSessionRequest>('/auth/session');
-  return res.data.success;
+  try {
+    const res = await api.get<CheckSessionRequest>('/auth/session');
+    return res.data?.success ?? false;
+  } catch {
+    return false;
+  }
 };
 
 export const logout = async (): Promise<void> => {
@@ -80,8 +84,12 @@ export const logout = async (): Promise<void> => {
 };
 
 export const getMe = async () => {
-  const { data } = await api.get<User>('/users/me');
-  return data;
+  try {
+    const { data } = await api.get<User>('/users/me');
+    return data;
+  } catch {
+    return null;
+  }
 };
 
 export const updateProfile = async (data: UpdateProfile) => {
