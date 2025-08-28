@@ -3,8 +3,9 @@
 import css from "./SignUpPage.module.css";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { register } from '@/lib/api/clientApi';
+import { register, getMe } from '@/lib/api/clientApi';
 import { ApiError } from '@/lib/api/api';
+import { useAuthStore } from '@/lib/store/authStore';
 
 const SignUp = () => {
   const router = useRouter();
@@ -21,8 +22,14 @@ const SignUp = () => {
     const password = formData.get('password') as string;
 
     try {
-      await register({ email, password });
-      router.push('/sign-in');
+      let user = await register({ email, password });
+      // ensure we have full user data (backend may not return username/avatar on register)
+      if (!user.username || !user.avatar) {
+        const full = await getMe();
+        if (full) user = full;
+      }
+      useAuthStore.getState().setUser(user);
+      router.push('/profile');
     } catch (err) {
       setError(
         (err as ApiError).response?.data?.error ??

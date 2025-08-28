@@ -1,6 +1,6 @@
 import { api } from "./api";
-import type { Note, NewNoteData } from "../../types/note";
-import {User} from '../../types/user';
+import type { Note, NewNoteData } from "@/types/note";
+import { User } from '@/types/user';
 
 
 export interface FetchNotesResponse {

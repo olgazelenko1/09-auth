@@ -1,73 +1,69 @@
+
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { parse } from 'cookie';
 import { checkServerSession } from './lib/api/serverApi';
 
-const privateRoutes = ['/profile'];
+const privateRoutes = ['/profile', '/notes'];
 const publicRoutes = ['/sign-in', '/sign-up'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
   const accessToken = request.cookies.get('accessToken')?.value;
   const refreshToken = request.cookies.get('refreshToken')?.value;
 
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-  const isPrivateRoute = privateRoutes.some(route => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
+  const isPrivateRoute = privateRoutes.some((route) => pathname.startsWith(route));
 
-  // Якщо немає accessToken
   if (!accessToken) {
     if (refreshToken) {
-      // пробуємо оновити сесію
+
       const data = await checkServerSession();
       const setCookie = data.headers['set-cookie'];
 
       if (setCookie) {
         const cookieArray = Array.isArray(setCookie) ? setCookie : [setCookie];
-        const response = NextResponse.next();
-
+        const res = NextResponse.next();
         for (const cookieStr of cookieArray) {
           const parsed = parse(cookieStr);
-          if (parsed.accessToken) {
-            response.cookies.set('accessToken', parsed.accessToken, {
-              path: parsed.Path,
-              maxAge: Number(parsed['Max-Age']),
-              expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
+
+          if (parsed.accessToken)
+            res.cookies.set('accessToken', parsed.accessToken, {
+              path: parsed.Path || '/',
+              maxAge: parsed['Max-Age'] ? Number(parsed['Max-Age']) : undefined,
             });
-          }
-          if (parsed.refreshToken) {
-            response.cookies.set('refreshToken', parsed.refreshToken, {
-              path: parsed.Path,
-              maxAge: Number(parsed['Max-Age']),
-              expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
+          if (parsed.refreshToken)
+            res.cookies.set('refreshToken', parsed.refreshToken, {
+              path: parsed.Path || '/',
+              maxAge: parsed['Max-Age'] ? Number(parsed['Max-Age']) : undefined,
             });
-          }
         }
 
-        // Якщо користувач йде на публічну сторінку → редіректимо на /
         if (isPublicRoute) {
           return NextResponse.redirect(new URL('/', request.url));
         }
 
-        return response;
+        if (isPrivateRoute) {
+          return res;
+        }
       }
     }
-
-    // Без токена йдемо тільки на публічні сторінки
-    if (isPublicRoute) return NextResponse.next();
-
-    // Якщо приватний маршрут → редіректимо на логін
+    if (isPublicRoute) {
+      return NextResponse.next();
+    }
     if (isPrivateRoute) {
       return NextResponse.redirect(new URL('/sign-in', request.url));
     }
   }
-
-  // Якщо користувач вже авторизований і йде на публічну сторінку
   if (isPublicRoute) {
     return NextResponse.redirect(new URL('/', request.url));
   }
-
+  if (isPrivateRoute) {
+    return NextResponse.next();
+  }
   return NextResponse.next();
 }
-
 export const config = {
-  matcher: ['/profile/:path*', '/sign-in', '/sign-up'],
+  matcher: ['/profile/:path*', '/notes/:path*', '/sign-in', '/sign-up'],
 };
